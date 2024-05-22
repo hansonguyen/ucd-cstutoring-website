@@ -11,37 +11,35 @@ type SessionStatsProps = {
 };
 
 export default function SessionStats({ entries }: SessionStatsProps) {
-  const pastWeekSessionTime = useMemo(
-    () =>
-      millisecondsToMinutesSeconds(
-        entries.reduce((acc, cur) => {
-          if (isAttendance(cur)) {
-            return getLastSunday() > new Date(cur.helpStartUnixMs)
-              ? acc
-              : acc + (cur.helpEndUnixMs - cur.helpStartUnixMs);
-          }
+  const pastWeekSessionTime = useMemo(() => {
+    let time = 0;
+    for (const entry of entries) {
+      if (isAttendance(entry)) {
+        time =
+          getLastSunday() > new Date(entry.helpStartUnixMs)
+            ? time
+            : time + (entry.helpEndUnixMs - entry.helpStartUnixMs);
+      } else {
+        time =
+          getLastSunday() > new Date(entry.sessionStartUnixMs)
+            ? time
+            : time + (entry.sessionEndUnixMs - entry.sessionStartUnixMs);
+      }
+    }
+    return millisecondsToMinutesSeconds(time);
+  }, [entries]);
 
-          return getLastSunday() > new Date(cur.sessionStartUnixMs)
-            ? acc
-            : acc + (cur.sessionEndUnixMs - cur.sessionStartUnixMs);
-        }, 0)
-      ),
-    [entries]
-  );
-
-  const allSessionTime = useMemo(
-    () =>
-      millisecondsToMinutesSeconds(
-        entries.reduce((acc, cur) => {
-          if (isAttendance(cur)) {
-            return acc + (cur.helpEndUnixMs - cur.helpStartUnixMs);
-          }
-
-          return acc + (cur.sessionEndUnixMs - cur.sessionStartUnixMs);
-        }, 0)
-      ),
-    [entries]
-  );
+  const allSessionTime = useMemo(() => {
+    let time = 0;
+    for (const entry of entries) {
+      if (isAttendance(entry)) {
+        time += entry.helpEndUnixMs - entry.helpStartUnixMs;
+      } else {
+        time += entry.sessionEndUnixMs - entry.sessionStartUnixMs;
+      }
+    }
+    return millisecondsToMinutesSeconds(time);
+  }, [entries]);
 
   return (
     <Box display="flex" justifyContent="center" gap={8}>
