@@ -33,11 +33,10 @@ export default function AccountPage() {
           }
         );
 
-        console.log(response.data);
         setDiscordInfo(response.data);
       } catch (error) {
         setDiscordInfo(undefined);
-        console.log('An error occurred:', error);
+        console.error('An error occurred:', error);
       }
     };
 
